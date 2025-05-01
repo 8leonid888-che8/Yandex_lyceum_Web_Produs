@@ -60,6 +60,11 @@ def login():
 def index():
     return render_template("base.html")
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
 
 if __name__ == "__main__":
     main()

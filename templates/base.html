@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <style>
+        .grey_color { color: #808080; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#"><h1>Productive space</h1></a>
+        {% if current_user.is_authenticated %}
+            <a class="navbar-brand" href="/logout">{{ current_user.username }}</a>
+        {% else %}
+            <div>
+                <a class="btn btn-primary" href="/register">Register</a>
+                <a class="btn btn-success" href="/login">Log in</a>
+            </div>
+        {% endif %}
+        <span class="ml">Produs</span>
+    </div>
+</nav>
+<h5 class="grey_color">И на Марсе будут яблони цвести!</h5>
+
+<!-- Начало основного содержимого страницы -->
+<main role="main" class="container">
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>
