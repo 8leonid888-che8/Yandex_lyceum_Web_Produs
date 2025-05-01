@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect
 from data import db_session
 from data.users import User
+from data.tasks import Task
 from forms.user import RegisterForm, LoginForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
@@ -18,11 +19,18 @@ def load_user(user_id):
 
 def main():
     db_session.global_init("db/produs.db")
+    db_sess = db_session.create_session()
+    task = Task()
+    task.user_id = 1
+    task.description = "first task"
+    # task.project = "project1"
+    db_sess.add(task)
+    db_sess.commit()
     app.run()
 
 
 @app.route("/register", methods=["GET", "POST"])
-def reqister():
+def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
@@ -65,6 +73,8 @@ def index():
 def logout():
     logout_user()
     return redirect("/")
+
+
 
 if __name__ == "__main__":
     main()

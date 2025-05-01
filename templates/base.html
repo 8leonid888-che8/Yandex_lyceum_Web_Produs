@@ -1,34 +1,102 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
     <style>
         .grey_color { color: #808080; }
+        .sidebar {
+            height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+            background: #f8f9fa;
+        }
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        .nav-button:hover {
+            transform: translateX(10px);
+            background: #e9ecef;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
-
 <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#"><h1>Productive space</h1></a>
         {% if current_user.is_authenticated %}
-            <a class="navbar-brand" href="/logout">{{ current_user.username }}</a>
+        <a class="navbar-brand" href="/logout">{{ current_user.username }}</a>
         {% else %}
-            <div>
-                <a class="btn btn-primary" href="/register">Register</a>
-                <a class="btn btn-success" href="/login">Log in</a>
-            </div>
+        <div>
+            <a class="btn btn-primary" href="/register">Register</a>
+            <a class="btn btn-success" href="/login">Log in</a>
+        </div>
         {% endif %}
         <span class="ml">Produs</span>
     </div>
 </nav>
-<h5 class="grey_color">И на Марсе будут яблони цвести!</h5>
+{% if current_user.is_authenticated %}
+<div class="row">
+    <!-- Боковое меню -->
+    <nav class="col-md-3 col-lg-2 sidebar p-3">
+        <h4 class="mb-4"><i class="bi bi-list-task"></i> Menu</h4>
 
-<!-- Начало основного содержимого страницы -->
-<main role="main" class="container">
-    {% block content %}{% endblock %}
-</main>
+        <button class="btn btn-primary w-100 mb-3">
+            <i class="bi bi-plus-circle"></i> New task
+        </button>
+
+        <div class="d-flex flex-column gap-2">
+            <button class="btn btn-outline-secondary nav-button">
+                <i class="bi bi-inboxes"></i> All tasks
+            </button>
+            <button class="btn btn-outline-secondary nav-button">
+                <i class="bi bi-bookshelf"></i> Projects
+            </button>
+            <button class="btn btn-outline-secondary nav-button">
+                <i class="bi bi-star"></i> Важные
+            </button>
+            <button class="btn btn-outline-secondary nav-button">
+                <i class="bi bi-check2-square"></i> Сompleted
+            </button>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="col-md-9 ms-sm-auto col-lg-10 main-content">
+        {% block auth_content %}{% endblock %}
+    </div>
+</div>
+{% else %}
+<div class="main-content">
+{% block content %}{% endblock %}
+</div>
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
