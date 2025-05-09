@@ -17,7 +17,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
 
     tasks = orm.relationship("Task", back_populates="user", foreign_keys="Task.user_id")
-
+    projects = orm.relationship("Project", back_populates="user", foreign_keys="Project.user_id")
 
     def __repr__(self):
         return f'<User > {self.id} {self.name} {self.email}'

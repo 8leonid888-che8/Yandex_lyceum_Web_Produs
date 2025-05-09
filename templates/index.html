@@ -2,11 +2,8 @@
 
 {% block auth_content %}
 <div class="container">
-    <h2 class="mt-4">My Tasks</h2>
-    
-
-    <h3>Today</h3>
-    <div class="row">
+    <h2 class="mt-4">Today</h2>
+     <div class="row">
         <div class="col-md-12">
             <table class="table table-striped">
                 <thead>
@@ -42,8 +39,8 @@
                             </div>
                         </td>
                         <td>
-                            <a class="btn btn-warning btn-sm" href="/edit_task/{{ task.id }}">Edit</a>
-                            <a class="btn btn-danger btn-sm" href="/delete_task/{{ task.id }}">Delete</a>
+                            <a class="btn btn-warning btn-sm" href="/edit/today/task/{{ task.id }}">Edit</a>
+                            <a class="btn btn-danger btn-sm" href="/delete/today/task/{{ task.id }}">Delete</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -90,8 +87,8 @@
                             </div>
                         </td>
                         <td>
-                            <a class="btn btn-warning btn-sm" href="/edit_task/{{ task.id }}">Edit</a>
-                            <a class="btn btn-danger btn-sm" href="/delete_task/{{ task.id }}">Delete</a>
+                            <a class="btn btn-warning btn-sm" href="/edit/today/task/{{ task.id }}">Edit</a>
+                            <a class="btn btn-danger btn-sm" href="/delete/today/task/{{ task.id }}">Delete</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -109,6 +106,5 @@ function updateFormAction(taskId, isChecked, page) {
     form.submit();
 }
 </script>
-
 
 {% endblock %}

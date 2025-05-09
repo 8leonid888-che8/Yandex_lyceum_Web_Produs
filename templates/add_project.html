@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<h1>Add Task</h1>
+
+{% if message %}
+    <p class="alert alert-danger">{{ message }}</p>
+{% endif %}
+
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+        {% endfor %}
+    </p>
+    {{ form.submit(type="submit", class="btn btn-primary") }}
+    <div>{{ message }}</div>
+
+</form>
+
+{% endblock %}

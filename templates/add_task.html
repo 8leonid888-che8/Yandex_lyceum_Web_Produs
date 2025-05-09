@@ -45,6 +45,7 @@
  <div class="mb-3">
         {{ form.project.label(class="form-label") }}
         <select class="form-select" id="project" name="project">
+             <option value="" disabled selected>Select a project</option>
             {% for project in projects %}
                 <option value="{{ project.name }}" {% if form.project.data|string == project.id|string %}selected{% endif %}>
                     {{ project.name }}

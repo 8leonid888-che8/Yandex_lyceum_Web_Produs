@@ -1,14 +1,16 @@
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, request, abort
 from data import db_session
 from data.projects import Project
 from data.users import User
 from data.tasks import Task
 from forms.user import RegisterForm, LoginForm
 from forms.task import AddTask
+from forms.project import AddProject
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from datetime import datetime
 from sqlalchemy import func
 from produs_funcs import update_deadline
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "produs_private_key"
 login_manager = LoginManager()
@@ -71,9 +73,117 @@ def login():
 @app.route("/")
 def index():
     db_sess = db_session.create_session()
-    incomplete_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(), Task.completed == False).all()
-    completed_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(), Task.completed == True).all()
-    return render_template("index.html", title="Today",incomplete_tasks= incomplete_tasks, completed_tasks=completed_tasks)
+    incomplete_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
+                                                  Task.completed == False).all()
+    completed_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
+                                                 Task.completed == True).all()
+    return render_template("index.html", title="Today", incomplete_tasks=incomplete_tasks,
+                           completed_tasks=completed_tasks)
+
+
+@app.route('/edit/<string:page>/<string:obj>/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_obj(page, obj, id):
+    if obj in "task":
+        db_sess = db_session.create_session()
+        projects = db_sess.query(Project).all()
+        form = AddTask()
+        if request.method == "GET":
+            db_sess = db_session.create_session()
+            task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
+            if task:
+                form.name.data = task.name
+                form.description.data = task.description
+                form.deadline.data = task.deadline
+                form.reminders.data = task.reminders
+                form.project.data = task.project
+
+            else:
+                abort(404)
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+            task = db_sess.query(Task).filter(Task.id == id,
+                                              Task.user == current_user
+                                              ).first()
+            if task:
+                task.name = form.name.data
+                task.description = form.description.data
+                task.deadline = form.deadline.data
+                task.reminders = form.reminders.data
+                db_sess.merge(task)
+                project = db_sess.query(Project).filter(Project.name == form.project.data, Project.user == current_user).first()
+                if project:
+                    task.project.append(project)  # Добавление проекта к задаче
+                db_sess.commit()
+                if page in "all":
+                    return redirect("/all_tasks")
+                if page in "today":
+                    return redirect("/")
+
+            else:
+                abort(404)
+        return render_template('add_task.html',
+                               title='Edit task',
+                               form=form,projects=projects
+                               )
+    if obj in "project":
+        form = AddProject()
+        if request.method == "GET":
+            db_sess = db_session.create_session()
+            project = db_sess.query(Project).filter(Project.id == id, Project.user == current_user).first()
+            if project:
+                form.name.data = project.name
+            else:
+                abort(404)
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+            project = db_sess.query(Project).filter(Project.id == id,
+                                              Project.user == current_user
+                                              ).first()
+            if project:
+                project.name = form.name.data
+                db_sess.merge(project)
+                db_sess.commit()
+                return redirect("/projects")
+
+            else:
+                abort(404)
+        return render_template('add_project.html',
+                               title='Edit project',
+                               form=form
+                               )
+
+
+@app.route('/delete/<string:page>/<string:obj>/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_obj(page, obj, id):
+    print(obj)
+    if obj in "task":
+        db_sess = db_session.create_session()
+        task = db_sess.query(Task).filter(Task.id == id,
+                                          Task.user == current_user
+                                          ).first()
+        if task:
+            db_sess.delete(task)
+            db_sess.commit()
+        else:
+            abort(404)
+        if page in "all":
+            return redirect("/all_tasks")
+        if page in "today":
+            return redirect("/")
+
+    if obj in "project":
+        db_sess = db_session.create_session()
+        project = db_sess.query(Project).filter(Project.id == id,
+                                          Project.user == current_user
+                                          ).first()
+        if project:
+            db_sess.delete(project)
+            db_sess.commit()
+        else:
+            abort(404)
+        return redirect("/projects")
 
 
 @app.route("/logout")
@@ -103,6 +213,7 @@ def add_task():
         )
 
         # Добавление задачи в сессию
+        # Добавление задачи в сессию
         db_sess.add(task_t)
         project = db_sess.query(Project).filter(Project.name == form.project.data).first()
         if project:
@@ -114,13 +225,14 @@ def add_task():
     return render_template('add_task.html', title='Add task', form=form, projects=projects)
 
 
+
 @app.route("/all_tasks", methods=["GET", "POST"])
 def show_all_tasks():
     update_deadline()
     db_sess = db_session.create_session()
     incomplete_tasks = sorted(db_sess.query(Task).filter(Task.completed == False).all(), key=lambda x: x.deadline)
     completed_tasks = sorted(db_sess.query(Task).filter(Task.completed == True).all(), key=lambda x: x.deadline)
-    return render_template("list_of_tasks.html", title="All tasks", incomplete_tasks=incomplete_tasks,
+    return render_template("all_tasks.html", title="All tasks", incomplete_tasks=incomplete_tasks,
                            completed_tasks=completed_tasks)
 
 
@@ -147,6 +259,33 @@ def update_checkbox_task(status, page, id_task):
         return redirect("/all_tasks")
     if page in "today":
         return redirect("/")
+
+
+@app.route("/projects", methods=["GET", "POST"])
+def show_projects():
+    db_sess = db_session.create_session()
+    projects = db_sess.query(Project).all()
+    return render_template("projects.html", title="Projects", projects=projects)
+
+@app.route("/add_project", methods=["GET", "POST"])
+@login_required
+def add_project():
+    db_sess = db_session.create_session()
+    form = AddProject()
+
+    if form.validate_on_submit():
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
+        project = Project(
+            name=form.name.data,
+            user=user
+        )
+
+        db_sess.add(project)
+        db_sess.commit()
+        return redirect('/projects')
+
+    return render_template('add_project.html', title='Add project', form=form)
+
 
 
 if __name__ == "__main__":
