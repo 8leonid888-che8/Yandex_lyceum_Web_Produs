@@ -65,19 +65,22 @@
     <nav class="col-md-3 col-lg-2 sidebar p-3">
         <h4 class="mb-4"><i class="bi bi-list-task"></i> Menu</h4>
 
-        <button class="btn btn-primary w-100 mb-3">
+        <button class="btn btn-primary w-100 mb-3" onclick="window.location.href='/add_task';">
             <i class="bi bi-plus-circle"></i> New task
         </button>
 
         <div class="d-flex flex-column gap-2">
-            <button class="btn btn-outline-secondary nav-button">
+            <button class="btn btn-outline-secondary nav-button" onclick="window.location.href='/';">
+                <i class="bi bi-house-door"></i> Home
+            </button>
+            <button class="btn btn-outline-secondary nav-button" onclick="window.location.href='/all_tasks';">
                 <i class="bi bi-inboxes"></i> All tasks
             </button>
             <button class="btn btn-outline-secondary nav-button">
                 <i class="bi bi-bookshelf"></i> Projects
             </button>
             <button class="btn btn-outline-secondary nav-button">
-                <i class="bi bi-star"></i> Важные
+                <i class="bi bi-star"></i> Telegram bot
             </button>
             <button class="btn btn-outline-secondary nav-button">
                 <i class="bi bi-check2-square"></i> Сompleted
@@ -92,7 +95,7 @@
 </div>
 {% else %}
 <div class="main-content">
-{% block content %}{% endblock %}
+    {% block content %}{% endblock %}
 </div>
 {% endif %}
 

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block auth_content %}
+<h1>Add Task</h1>
+
+{% if message %}
+    <p class="alert alert-danger">{{ message }}</p>
+{% endif %}
+
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.description.label }}<br>
+        {{ form.description(class="form-control") }}<br>
+        {% for error in form.description.errors %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.deadline.label }}<br>
+        {{ form.deadline(class="form-control", type="date") }}<br>
+        {% for error in form.deadline.errors %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.reminders.label }}<br>
+        {{ form.reminders(class="form-control", type="datetime-local") }}<br>
+        {% for error in form.reminders.errors %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+        {% endfor %}
+    </p>
+
+ <div class="mb-3">
+        {{ form.project.label(class="form-label") }}
+        <select class="form-select" id="project" name="project">
+            {% for project in projects %}
+                <option value="{{ project.name }}" {% if form.project.data|string == project.id|string %}selected{% endif %}>
+                    {{ project.name }}
+                </option>
+            {% endfor %}
+        </select>
+        {% for error in form.project.errors %}
+            <div class="alert alert-danger mt-2">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    {{ form.submit(type="submit", class="btn btn-primary") }}
+    <div>{{ message }}</div>
+</form>
+
+{% endblock %}
