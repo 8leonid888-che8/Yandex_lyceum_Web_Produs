@@ -111,7 +111,8 @@ def edit_obj(page, obj, id):
                 task.deadline = form.deadline.data
                 task.reminders = form.reminders.data
                 db_sess.merge(task)
-                project = db_sess.query(Project).filter(Project.name == form.project.data, Project.user == current_user).first()
+                project = db_sess.query(Project).filter(Project.name == form.project.data,
+                                                        Project.user == current_user).first()
                 if project:
                     task.project.append(project)  # Добавление проекта к задаче
                 db_sess.commit()
@@ -124,7 +125,7 @@ def edit_obj(page, obj, id):
                 abort(404)
         return render_template('add_task.html',
                                title='Edit task',
-                               form=form,projects=projects
+                               form=form, projects=projects
                                )
     if obj in "project":
         form = AddProject()
@@ -138,8 +139,8 @@ def edit_obj(page, obj, id):
         if form.validate_on_submit():
             db_sess = db_session.create_session()
             project = db_sess.query(Project).filter(Project.id == id,
-                                              Project.user == current_user
-                                              ).first()
+                                                    Project.user == current_user
+                                                    ).first()
             if project:
                 project.name = form.name.data
                 db_sess.merge(project)
@@ -176,8 +177,8 @@ def delete_obj(page, obj, id):
     if obj in "project":
         db_sess = db_session.create_session()
         project = db_sess.query(Project).filter(Project.id == id,
-                                          Project.user == current_user
-                                          ).first()
+                                                Project.user == current_user
+                                                ).first()
         if project:
             db_sess.delete(project)
             db_sess.commit()
@@ -225,7 +226,6 @@ def add_task():
     return render_template('add_task.html', title='Add task', form=form, projects=projects)
 
 
-
 @app.route("/all_tasks", methods=["GET", "POST"])
 def show_all_tasks():
     update_deadline()
@@ -267,6 +267,7 @@ def show_projects():
     projects = db_sess.query(Project).all()
     return render_template("projects.html", title="Projects", projects=projects)
 
+
 @app.route("/add_project", methods=["GET", "POST"])
 @login_required
 def add_project():
@@ -286,6 +287,29 @@ def add_project():
 
     return render_template('add_project.html', title='Add project', form=form)
 
+
+@app.route("/project/<int:id>", methods=["GET", "POST"])
+def info_of_project(id):
+    db_sess = db_session.create_session()
+    project = db_sess.query(Project).filter(Project.id == id).first()
+
+    if not project:
+        return "Project not found", 404  # Handle case where project is not found
+
+    # Get incomplete tasks associated with the project
+    incomplete_tasks = db_sess.query(Task).filter(
+        Task.completed == False,
+        Task.project.contains(project)  # Use contains() for membership check
+    ).all()
+
+    # Get completed tasks associated with the project
+    completed_tasks = db_sess.query(Task).filter(
+        Task.completed == True,
+        Task.project.contains(project)  # Use contains() for membership check
+    ).all()
+
+    return render_template("info_of_project.html", title=project.name, completed_tasks=completed_tasks,
+                           incomplete_tasks=incomplete_tasks)
 
 
 if __name__ == "__main__":
