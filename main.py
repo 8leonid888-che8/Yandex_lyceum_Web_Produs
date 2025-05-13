@@ -32,6 +32,7 @@ def main():
     # # task.project = "project1"
     # db_sess.add(task)
     # db_sess.commit()
+    # run_bot(TOKEN)
     app.run()
 
 
@@ -72,13 +73,16 @@ def login():
 
 @app.route("/")
 def index():
-    db_sess = db_session.create_session()
-    incomplete_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
-                                                  Task.completed == False).all()
-    completed_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
-                                                 Task.completed == True).all()
-    return render_template("index.html", title="Today", incomplete_tasks=incomplete_tasks,
-                           completed_tasks=completed_tasks)
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+        incomplete_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
+                                                      Task.completed == False).all()
+        completed_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
+                                                     Task.completed == True).all()
+        return render_template("index.html", title="Today", incomplete_tasks=incomplete_tasks,
+                               completed_tasks=completed_tasks)
+    else:
+        return render_template("information.html", title="Produs")
 
 
 @app.route('/edit/<string:page>/<string:obj>/<int:id>', methods=['GET', 'POST'])
@@ -236,16 +240,6 @@ def show_all_tasks():
                            completed_tasks=completed_tasks)
 
 
-# # выполнить задачу
-# @app.route("/update_task_completed/<int:id_task>", methods=["GET", "POST"])
-# def update_completed_task(id_task):
-#     db_sess = db_session.create_session()
-#     task = db_sess.query(Task).filter(Task.id == id_task).first()
-#     task.completed = False
-#     db_sess.commit()
-#     return redirect("/")
-#
-# # вернуть
 @app.route("/update_task/<string:status>/<string:page>/<int:id_task>", methods=["GET", "POST"])
 def update_checkbox_task(status, page, id_task):
     db_sess = db_session.create_session()
