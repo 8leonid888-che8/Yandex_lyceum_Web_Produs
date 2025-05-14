@@ -29,3 +29,6 @@ class Task(SqlAlchemyBase, SerializerMixin):
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
+
+    def __str__(self):
+        return f"{self.id} {self.name}"

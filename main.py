@@ -1,4 +1,7 @@
 from flask import Flask, render_template, redirect, flash, request, abort
+from flask_restful import reqparse, abort, Api, Resource
+from sqlalchemy.testing.suite.test_reflection import users
+
 from data import db_session
 from data.projects import Project
 from data.users import User
@@ -9,9 +12,12 @@ from forms.project import AddProject
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from datetime import datetime
 from sqlalchemy import func
-from produs_funcs import update_deadline
+from produs_funcs import update_deadline, generate_api_key
+from api import tasks_resource
+from api import projects_resource
 
 app = Flask(__name__)
+api = Api(app)
 app.config["SECRET_KEY"] = "produs_private_key"
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -25,14 +31,9 @@ def load_user(user_id):
 
 def main():
     db_session.global_init("db/produs.db")
-    # db_sess = db_session.create_session()
-    # task = Task()
-    # task.user_id = 1
-    # task.description = "first task"
-    # # task.project = "project1"
-    # db_sess.add(task)
-    # db_sess.commit()
-    # run_bot(TOKEN)
+    api.add_resource(tasks_resource.TaskResource, "/api/<string:user_api>/task/<path:args>/")
+    api.add_resource(projects_resource.ProjectResource, "/api/<string:user_api>/project/<path:args>/")
+
     app.run()
 
 
@@ -299,11 +300,30 @@ def info_of_project(id):
     # Get completed tasks associated with the project
     completed_tasks = db_sess.query(Task).filter(
         Task.completed == True,
-        Task.project.contains(project)  # Use contains() for membership check
+        Task.project.contains(project)
     ).all()
 
     return render_template("info_of_project.html", title=project.name, completed_tasks=completed_tasks,
                            incomplete_tasks=incomplete_tasks)
+
+
+@app.route("/produs_api")
+def get_api():
+    if current_user.is_authenticated:
+        user_api = current_user.api
+        return render_template("produs_api.html", user_api=user_api)
+
+
+@app.route("/new_api")
+def generate_new_api():
+    if current_user.is_authenticated:
+        new_api = generate_api_key(16)
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).get(current_user.id)
+        user.api = new_api
+        db_sess.merge(user)
+        db_sess.commit()
+        return redirect("produs_api")
 
 
 if __name__ == "__main__":

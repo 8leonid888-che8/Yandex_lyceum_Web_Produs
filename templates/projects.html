@@ -2,35 +2,32 @@
 
 {% block auth_content %}
 <div class="container">
-    <h2 class="mt-4">Projects</h2>
+    <h2 class="mt-4 text-center">Projects</h2> <!-- Центрируем заголовок -->
 
-<!--    <h3>Незавершенные задачи</h3>-->
-    <div class="row">
-        <div class="col-md-12">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Project</th>
-                        <th>Действия</th>
-                    </tr>
+    <div class="row justify-content-center"> <!-- Центрируем содержимое -->
+        <div class="col-md-8"> <!-- Увеличиваем ширину колонки для более широкой таблицы -->
+            <table class="table table-striped table-bordered text-center"> <!-- Добавляем классы для стилизации -->
+                <thead class="thead-dark"> <!-- Темная шапка таблицы -->
+                <tr>
+                    <th>Project</th>
+                    <th>Actions</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for project in projects %}
-                    <tr>
-                        <td>
-                          <a href="/project/{{ project.id }}">{{ project.name }}</a></td>
-                        <td>
-                            <a class="btn btn-warning btn-sm" href="/edit/all/project/{{ project.id }}">Редактировать</a>
-                            <a class="btn btn-danger btn-sm" href="/delete/all/project/{{ project.id }}">Удалить</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                {% for project in projects %}
+                <tr>
+                    <td>
+                        <a href="/project/{{ project.id }}">{{ project.name }}</a>
+                    </td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" href="/edit/all/project/{{ project.id }}">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/delete/all/project/{{ project.id }}">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-
-
 {% endblock %}
