@@ -249,7 +249,6 @@ def main():
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-
             EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_email)],
             PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_password)],
         },
@@ -259,7 +258,6 @@ def main():
     project_conv_handler = ConversationHandler(
         entry_points=[CommandHandler('tasks_from_project', request_project_name)],
         states={
-
             PROJECT_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_project_name)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
@@ -267,7 +265,6 @@ def main():
     delete_task_conv_handler = ConversationHandler(
         entry_points=[CommandHandler('delete_task', request_task_id)],
         states={
-
             TASK_ID_FOR_DELETE: [MessageHandler(filters.TEXT & ~filters.COMMAND, delete_task_by_id)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
@@ -275,7 +272,6 @@ def main():
     delete_project_conv_handler = ConversationHandler(
         entry_points=[CommandHandler('delete_project', request_project_id)],
         states={
-
             PROJECT_ID_FOR_DELETE: [MessageHandler(filters.TEXT & ~filters.COMMAND, delete_project_by_id)],
         },
         fallbacks=[CommandHandler('cancel', cancel)],
@@ -285,13 +281,9 @@ def main():
     application.add_handler(CommandHandler('all_tasks', get_all_tasks))
     application.add_handler(CommandHandler('today_tasks', get_today_tasks))
     application.add_handler(CommandHandler('projects', get_projects))
-
     application.add_handler(project_conv_handler)
-
     application.add_handler(delete_task_conv_handler)
-
     application.add_handler(delete_project_conv_handler)
-
     application.job_queue.run_repeating(lambda ctx: asyncio.create_task(reminder_loop(application)), interval=60,
                                         first=0)
     application.run_polling()
