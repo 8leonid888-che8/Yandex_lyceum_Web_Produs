@@ -349,7 +349,7 @@ def info_of_project(id):
 def get_api():
     if current_user.is_authenticated:
         user_api = current_user.api
-        return render_template("produs_api.html", user_api=user_api)
+        return render_template("produs_api.html", user_api=user_api, title="Api")
 
 
 @app.route("/new_api")
