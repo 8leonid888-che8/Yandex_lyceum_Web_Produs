@@ -40,11 +40,15 @@ class TaskResource(Resource):
 
         if args[0] == "tasks_from_project":
             project_id = args[1]
+            try:
+                project_id = int(project_id)
+            except Exception as e:
+                pass
             print(args)
             abort_if_project_not_found(project_id)
             tasks = session.query(Task).join(Task.project).filter(Project.id == project_id,  Task.user == user).all()
             project = session.query(Project).get(project_id)
-            title = project.id
+            title = "project"
 
         if title and tasks:
             return jsonify({
