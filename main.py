@@ -15,6 +15,8 @@ from sqlalchemy import func
 from produs_funcs import update_deadline, generate_api_key
 from api import tasks_resource
 from api import projects_resource
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 api = Api(app)
@@ -50,7 +52,6 @@ def register():
         user = User(
             username=form.username.data,
             email=form.email.data,
-            tg_name=form.tg_name.data,
         )
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -77,9 +78,9 @@ def index():
     if current_user.is_authenticated:
         db_sess = db_session.create_session()
         incomplete_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
-                                                      Task.completed == False).all()
+                                                      Task.completed == False, Task.user == current_user).all()
         completed_tasks = db_sess.query(Task).filter(func.date(Task.deadline) == datetime.now().date(),
-                                                     Task.completed == True).all()
+                                                     Task.completed == True, Task.user == current_user).all()
         return render_template("index.html", title="Today", incomplete_tasks=incomplete_tasks,
                                completed_tasks=completed_tasks)
     else:
@@ -93,6 +94,7 @@ def edit_obj(page, obj, id):
         db_sess = db_session.create_session()
         projects = db_sess.query(Project).all()
         form = AddTask()
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
         if request.method == "GET":
             db_sess = db_session.create_session()
             task = db_sess.query(Task).filter(Task.id == id, Task.user == current_user).first()
@@ -102,7 +104,11 @@ def edit_obj(page, obj, id):
                 form.deadline.data = task.deadline
                 form.reminders.data = task.reminders
                 form.project.data = task.project
-
+                form.file.data = task.file
+                if task.file:
+                    user.number_of_files += 1
+                    db_sess.merge(user)
+                    db_sess.commit()
             else:
                 abort(404)
         if form.validate_on_submit():
@@ -115,7 +121,21 @@ def edit_obj(page, obj, id):
                 task.description = form.description.data
                 task.deadline = form.deadline.data
                 task.reminders = form.reminders.data
+                if form.file.data and user.number_of_files > 0:
+                    file = form.file.data
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join('static/img', filename)
+                    task_file = f'static/img/{filename}'
+                    if task.file and task_file != task.file:
+                        try:
+                            os.remove(task.file)
+                        except FileNotFoundError:
+                            pass
+                    file.save(file_path)
+                    task.file = task_file
+                    user.number_of_files -= 1
                 db_sess.merge(task)
+                db_sess.merge(user)
                 project = db_sess.query(Project).filter(Project.name == form.project.data,
                                                         Project.user == current_user).first()
                 if project:
@@ -170,6 +190,15 @@ def delete_obj(page, obj, id):
                                           Task.user == current_user
                                           ).first()
         if task:
+            if task.file:
+                user = db_sess.query(User).filter(User.id == current_user.id).first()
+                try:
+                    os.remove(task.file)
+                    user.number_of_files += 1
+                    db_sess.merge(user)
+                except FileNotFoundError:
+                    pass
+
             db_sess.delete(task)
             db_sess.commit()
         else:
@@ -203,7 +232,7 @@ def logout():
 @login_required
 def add_task():
     db_sess = db_session.create_session()
-    projects = db_sess.query(Project).all()
+    projects = db_sess.query(Project).filter(Project.user == current_user)
     form = AddTask()
 
     if form.validate_on_submit():
@@ -215,13 +244,19 @@ def add_task():
             description=form.description.data,
             deadline=form.deadline.data,
             reminders=form.reminders.data,
-            user=user,  # Используем объект пользователя, а не его id
+            user=user
         )
+        if form.file.data and user.number_of_files > 0:
+            file = form.file.data
+            filename = secure_filename(file.filename)
+            file_path = os.path.join('static/img', filename)
+            file.save(file_path)
+            task_t.file = f'static/img/{filename}'
+            user.number_of_files -= 1
+            db_sess.merge(user)
 
-        # Добавление задачи в сессию
-        # Добавление задачи в сессию
         db_sess.add(task_t)
-        project = db_sess.query(Project).filter(Project.name == form.project.data).first()
+        project = db_sess.query(Project).filter(Project.name == form.project.data, Project.user == current_user).first()
         if project:
             task_t.project.append(project)  # Добавление проекта к задаче
 
@@ -235,8 +270,10 @@ def add_task():
 def show_all_tasks():
     update_deadline()
     db_sess = db_session.create_session()
-    incomplete_tasks = sorted(db_sess.query(Task).filter(Task.completed == False).all(), key=lambda x: x.deadline)
-    completed_tasks = sorted(db_sess.query(Task).filter(Task.completed == True).all(), key=lambda x: x.deadline)
+    incomplete_tasks = sorted(db_sess.query(Task).filter(Task.completed == False, Task.user == current_user).all(),
+                              key=lambda x: x.deadline)
+    completed_tasks = sorted(db_sess.query(Task).filter(Task.completed == True, Task.user == current_user).all(),
+                             key=lambda x: x.deadline)
     return render_template("all_tasks.html", title="All tasks", incomplete_tasks=incomplete_tasks,
                            completed_tasks=completed_tasks)
 
@@ -254,12 +291,15 @@ def update_checkbox_task(status, page, id_task):
         return redirect("/all_tasks")
     if page in "today":
         return redirect("/")
+    if "project" in page:
+        new_page = page.split("_")
+        return redirect(f"/{new_page[0]}/{new_page[1]}")
 
 
 @app.route("/projects", methods=["GET", "POST"])
 def show_projects():
     db_sess = db_session.create_session()
-    projects = db_sess.query(Project).all()
+    projects = db_sess.query(Project).filter(Project.user == current_user)
     return render_template("projects.html", title="Projects", projects=projects)
 
 
@@ -286,25 +326,23 @@ def add_project():
 @app.route("/project/<int:id>", methods=["GET", "POST"])
 def info_of_project(id):
     db_sess = db_session.create_session()
-    project = db_sess.query(Project).filter(Project.id == id).first()
+    project = db_sess.query(Project).filter(Project.id == id, Project.user == current_user).first()
 
     if not project:
-        return "Project not found", 404  # Handle case where project is not found
+        return "Project not found"
 
-    # Get incomplete tasks associated with the project
     incomplete_tasks = db_sess.query(Task).filter(
         Task.completed == False,
-        Task.project.contains(project)  # Use contains() for membership check
+        Task.project.contains(project), Task.user == current_user
     ).all()
 
-    # Get completed tasks associated with the project
     completed_tasks = db_sess.query(Task).filter(
-        Task.completed == True,
-        Task.project.contains(project)
+        Task.completed == True, Task.user == current_user,
+    Task.project.contains(project)
     ).all()
 
     return render_template("info_of_project.html", title=project.name, completed_tasks=completed_tasks,
-                           incomplete_tasks=incomplete_tasks)
+                           incomplete_tasks=incomplete_tasks, project=project)
 
 
 @app.route("/produs_api")

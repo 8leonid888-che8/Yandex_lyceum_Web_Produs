@@ -9,39 +9,39 @@
     <p class="alert alert-danger">{{ message }}</p>
     {% endif %}
 
-    <form action="" method="post">
+    <form action="" method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
 
         <p>
             {{ form.name.label }}<br>
             {{ form.name(class="form-control") }}<br>
             {% for error in form.name.errors %}
-        <p class="alert alert-danger" role="alert">{{ error }}</p>
-        {% endfor %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
         </p>
 
         <p>
             {{ form.description.label }}<br>
             {{ form.description(class="form-control") }}<br>
             {% for error in form.description.errors %}
-        <p class="alert alert-danger" role="alert">{{ error }}</p>
-        {% endfor %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
         </p>
 
         <p>
             {{ form.deadline.label }}<br>
             {{ form.deadline(class="form-control", type="date") }}<br>
             {% for error in form.deadline.errors %}
-        <p class="alert alert-danger" role="alert">{{ error }}</p>
-        {% endfor %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
         </p>
 
         <p>
             {{ form.reminders.label }}<br>
             {{ form.reminders(class="form-control", type="datetime-local") }}<br>
             {% for error in form.reminders.errors %}
-        <p class="alert alert-danger" role="alert">{{ error }}</p>
-        {% endfor %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
         </p>
 
         <div class="mb-3">
@@ -49,8 +49,7 @@
             <select class="form-select" id="project" name="project">
                 <option value="" disabled selected>Select a project</option>
                 {% for project in projects %}
-                <option value="{{ project.name }}" {% if form.project.data|string== project.id|string %}selected{% endif
-                        %}>
+                <option value="{{ project.name }}" {% if form.project.data|string== project.id|string %}selected{% endif %}>
                     {{ project.name }}
                 </option>
                 {% endfor %}
@@ -58,6 +57,16 @@
             {% for error in form.project.errors %}
             <div class="alert alert-danger mt-2">{{ error }}</div>
             {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            <label for="file">Upload an image:</label><br>
+            <input type="file" id="file" name="file" class="form-control"><br>
+            {% if form.file.errors %}
+            {% for error in form.file.errors %}
+            <p class="alert alert-danger" role="alert">{{ error }}</p>
+            {% endfor %}
+            {% endif %}
         </div>
 
         {{ form.submit(type="submit", class="btn btn-primary") }}

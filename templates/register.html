@@ -20,14 +20,6 @@
         </p>
 
         <p>
-            {{ form.tg_name.label }}<br>
-            {{ form.tg_name(class="form-control") }}<br>
-            {% for error in form.tg_name.errors %}
-        <p class="alert alert-danger" role="alert">{{ error }}</p>
-        {% endfor %}
-        </p>
-
-        <p>
             {{ form.email.label }}<br>
             {{ form.email(class="form-control", type="email") }}<br>
             {% for error in form.email.errors %}

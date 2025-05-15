@@ -13,10 +13,10 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     username = sqlalchemy.Column(sqlalchemy.String)
     email = sqlalchemy.Column(sqlalchemy.String, unique=True)
-    tg_name = sqlalchemy.Column(sqlalchemy.String, unique=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     modified_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     api = sqlalchemy.Column(sqlalchemy.String, default=generate_api_key())
+    number_of_files = sqlalchemy.Column(sqlalchemy.Integer, default=10)
 
     tasks = orm.relationship("Task", back_populates="user", foreign_keys="Task.user_id")
     projects = orm.relationship("Project", back_populates="user", foreign_keys="Project.user_id")

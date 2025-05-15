@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from data import db_session
 from data.projects import Project
-from wtforms import StringField, SubmitField, ValidationError, DateField
+from wtforms import StringField, SubmitField, ValidationError, DateField, FileField
 from wtforms.validators import DataRequired, Optional
 from datetime import datetime
 
@@ -12,6 +12,7 @@ class AddTask(FlaskForm):
     deadline = DateField("Deadline", format='%Y-%m-%d', validators=[DataRequired()])
     reminders = StringField("Reminder", validators=[Optional()])
     project = StringField("Project", validators=[Optional()], default=None)
+    file = FileField("Upload Image", validators=[Optional()])
 
     def validate_project(self, project):
         db_sess = db_session.create_session()

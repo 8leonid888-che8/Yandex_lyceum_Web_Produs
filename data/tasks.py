@@ -16,6 +16,7 @@ class Task(SqlAlchemyBase, SerializerMixin):
     deadline = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     creation_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     reminders = sqlalchemy.Column(sqlalchemy.String)
+
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     user = orm.relationship("User", back_populates="tasks", foreign_keys=[user_id])
     project = orm.relationship("Project",
@@ -23,6 +24,7 @@ class Task(SqlAlchemyBase, SerializerMixin):
                                backref="tasks")
     completed = sqlalchemy.Column(sqlalchemy.BOOLEAN, default=False)
     late = sqlalchemy.Column(sqlalchemy.BOOLEAN, default=False)
+    file = sqlalchemy.Column(sqlalchemy.String)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

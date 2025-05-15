@@ -13,6 +13,7 @@
                     <th>Deadline</th>
                     <th>Reminder</th>
                     <th>Project</th>
+                    <th>Image</th>
                     <th>Completed</th>
                     <th>Actions</th>
                 </tr>
@@ -24,7 +25,14 @@
                     <td>{{ task.description }}</td>
                     <td>{{ task.deadline.strftime('%Y-%m-%d') }}</td>
                     <td>{{ " ".join(task.reminders.split("T")) }}</td>
-                    <td>{{ task.project[0].name if task.project else 'None' }}</td>
+                    <td>{{ task.project[0].name if task.project else '' }}</td>
+                    <td>
+                        {% if task.file %}
+                        <a href="{{ task.file }}" target="_blank" class="text-primary">View Image</a>
+                        {% else %}
+                        <span class="text-muted"></span>
+                        {% endif %}
+                    </td>
                     <td>
                         <div class="form-check">
                             <form id="form-{{ task.id }}" action="/update_task_completed/{{ task.id }}" method="POST">
@@ -60,6 +68,7 @@
                     <th>Deadline</th>
                     <th>Reminder</th>
                     <th>Project</th>
+                    <th>Image</th>
                     <th>Completed</th>
                     <th>Actions</th>
                 </tr>
@@ -72,6 +81,13 @@
                     <td>{{ task.deadline.strftime('%Y-%m-%d') }}</td>
                     <td>{{ " ".join(task.reminders.split("T")) }}</td>
                     <td>{{ task.project[0].name if task.project else '' }}</td>
+                    <td>
+                        {% if task.file %}
+                        <a href="{{ task.file }}" target="_blank" class="text-primary">View Image</a>
+                        {% else %}
+                        <span class="text-muted"></span>
+                        {% endif %}
+                    </td>
                     <td>
                         <div class="form-check">
                             <form id="form-{{ task.id }}" action="/update_task_uncompleted/{{ task.id }}" method="POST">
@@ -96,7 +112,6 @@
             </table>
         </div>
     </div>
-
 </div>
 
 <script>

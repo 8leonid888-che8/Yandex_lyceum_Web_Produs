@@ -35,6 +35,7 @@ class ProjectResource(Resource):
             return jsonify({
                 f'{title} project': [
                     {
+                        'id': project.id,
                         'name': project.name,
                     } for project in projects
                 ]
