@@ -1,0 +1,6 @@
+Flask
+Flask-login
+Flask-wft
+Sqlalchemy
+Python-telegram-bot
+Flask-restful
