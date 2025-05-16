@@ -1,7 +1,5 @@
-from flask import Flask, render_template, redirect, flash, request, abort
-from flask_restful import reqparse, abort, Api, Resource
-from sqlalchemy.testing.suite.test_reflection import users
-
+from flask import Flask, render_template, redirect, request, abort
+from flask_restful import  abort, Api
 from data import db_session
 from data.projects import Project
 from data.users import User

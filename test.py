@@ -1,10 +1,10 @@
 import requests
 
 # URL API для создания новой задачи
-url = "http://127.0.0.1:5000/api/b5ebf3ed998a494a812f04a6d32ea6ae/project/3"
+url = "http://127.0.0.1:5000/api/cb2b752c60db606be524b2a7977c1c9b/task/today"
 
 # Замените <user_api> на действительный API ключ пользователя
-user_api = "b5ebf3ed998a494a812f04a6d32ea6ae"
+user_api = "cb2b752c60db606be524b2a7977c1c9b"
 
 # Параметры запроса (тело запроса)
 task_data = {
@@ -12,7 +12,7 @@ task_data = {
 }
 
 # Отправка POST-запроса
-response = requests.delete(url, json=task_data)
+response = requests.get(url)
 
 # Проверка ответа
 if response.status_code == 201:
